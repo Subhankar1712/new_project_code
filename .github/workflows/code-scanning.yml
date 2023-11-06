@@ -1,0 +1,41 @@
+name: Code Scanning
+
+on:
+  push:
+    branches:
+      - main  # Adjust to your main branch name
+
+jobs:
+  codeql-analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x  # Adjust to the desired Python version
+
+    - name: Install CodeQL CLI
+      run: |
+        curl -sSL https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-linux64 -o codeql
+        chmod +x codeql
+        sudo mv codeql /usr/local/bin/
+      shell: bash
+
+    - name: Initialize CodeQL
+      run: |
+        codeql database create python-database --language=python
+        codeql database analyze python-database --path=.
+      shell: bash
+
+    - name: Upload CodeQL results
+      uses: actions/upload-artifact@v2
+      with:
+        name: codeql-results
+        path: .codeql
+
+  # Add additional jobs or steps to further process the results if needed.
